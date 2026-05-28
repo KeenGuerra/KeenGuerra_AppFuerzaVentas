@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../model/oficial_model.dart';
+import '../services/auth_service.dart';
+
 class AuthOficialViewModel extends ChangeNotifier {
+  final AuthService _authService = AuthService();
+
   bool loading = false;
   bool success = false;
   String? error;
-
-  final String codigoCorrecto = 'OFI001';
-  final String passwordCorrecto = 'bcpventas';
+  OficialModel? oficial;
 
   Future<void> login(String codigoEmpleado, String password) async {
     loading = true;
@@ -14,15 +17,45 @@ class AuthOficialViewModel extends ChangeNotifier {
     error = null;
     notifyListeners();
 
-    await Future.delayed(const Duration(milliseconds: 700));
+    try {
+      oficial = await _authService.login(
+        codigoEmpleado: codigoEmpleado,
+        password: password,
+      );
 
-    if (codigoEmpleado == codigoCorrecto && password == passwordCorrecto) {
       success = true;
-    } else {
-      error = 'Credenciales institucionales incorrectas';
+    } catch (e) {
+      error = e.toString().replaceFirst('Exception: ', '');
+      success = false;
+    } finally {
+      loading = false;
+      notifyListeners();
     }
+  }
 
-    loading = false;
+  Future<void> cargarSesionActual() async {
+    loading = true;
+    error = null;
+    notifyListeners();
+
+    try {
+      oficial = await _authService.getCurrentOficial();
+      success = oficial != null;
+    } catch (e) {
+      error = e.toString().replaceFirst('Exception: ', '');
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> logout() async {
+    await _authService.logout();
+
+    oficial = null;
+    success = false;
+    error = null;
+
     notifyListeners();
   }
 }

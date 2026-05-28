@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../../navigation/app_routes.dart';
 import '../../ui/theme/app_theme.dart';
 import '../../viewmodel/auth_oficial_viewmodel.dart';
@@ -11,41 +13,35 @@ class LoginOficialScreen extends StatefulWidget {
 }
 
 class _LoginOficialScreenState extends State<LoginOficialScreen> {
-  final AuthOficialViewModel viewModel = AuthOficialViewModel();
-
   final TextEditingController codigoController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
+  void ingresar() async {
+    final viewModel = context.read<AuthOficialViewModel>();
 
-    viewModel.addListener(() {
-      setState(() {});
+    await viewModel.login(
+      codigoController.text.trim(),
+      passwordController.text.trim(),
+    );
 
-      if (viewModel.success) {
-        Navigator.pushReplacementNamed(context, AppRoutes.cartera);
-      }
-    });
+    if (!mounted) return;
+
+    if (viewModel.success) {
+      Navigator.pushReplacementNamed(context, AppRoutes.cartera);
+    }
   }
 
   @override
   void dispose() {
     codigoController.dispose();
     passwordController.dispose();
-    viewModel.dispose();
     super.dispose();
-  }
-
-  void ingresar() {
-    viewModel.login(
-      codigoController.text.trim(),
-      passwordController.text.trim(),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<AuthOficialViewModel>();
+
     return Scaffold(
       backgroundColor: AppTheme.darkBackground,
       body: SafeArea(
@@ -107,6 +103,8 @@ class _LoginOficialScreenState extends State<LoginOficialScreen> {
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         labelText: 'Código de empleado',
+                        helperText: 'Ejemplo: OFI001',
+                        helperStyle: const TextStyle(color: Colors.white38),
                         labelStyle: const TextStyle(color: Colors.white70),
                         prefixIcon: const Icon(
                           Icons.badge,
@@ -200,7 +198,8 @@ class _LoginOficialScreenState extends State<LoginOficialScreen> {
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: const Text(
-                        'Credencial de prueba:\nCódigo: OFI001\nContraseña: bcpventas',
+                        'El acceso ahora se valida con Supabase Auth.\n'
+                        'Crea el usuario Auth como: ofi001@fuerzaventas.local',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 12,
