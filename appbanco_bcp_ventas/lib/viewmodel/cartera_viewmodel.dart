@@ -81,6 +81,7 @@ class CarteraViewModel extends ChangeNotifier {
           direccion: actual.direccion,
           latitud: actual.latitud,
           longitud: actual.longitud,
+          prioridad: actual.prioridad,
         );
 
         notifyListeners();

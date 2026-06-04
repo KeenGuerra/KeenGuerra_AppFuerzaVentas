@@ -58,6 +58,7 @@ class CarteraService {
         direccion: cliente?.direccion,
         latitud: cliente?.latitud,
         longitud: cliente?.longitud,
+        prioridad: item.prioridad,
       );
     }).toList();
   }

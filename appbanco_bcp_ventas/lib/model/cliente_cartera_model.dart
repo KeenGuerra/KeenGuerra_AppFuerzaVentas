@@ -7,6 +7,7 @@ class ClienteCarteraModel {
   final String? direccion;
   final double? latitud;
   final double? longitud;
+  final int prioridad;
 
   ClienteCarteraModel({
     required this.idCartera,
@@ -17,5 +18,6 @@ class ClienteCarteraModel {
     this.direccion,
     this.latitud,
     this.longitud,
+    this.prioridad = 1,
   });
 }
