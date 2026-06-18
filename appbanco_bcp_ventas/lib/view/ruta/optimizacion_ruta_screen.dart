@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:math';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../ui/theme/app_theme.dart';
 import '../../viewmodel/cartera_viewmodel.dart';
@@ -15,8 +17,9 @@ class OptimizacionRutaScreen extends StatefulWidget {
 
 class _OptimizacionRutaScreenState extends State<OptimizacionRutaScreen> {
   final GpsSimulatorService _gpsService = GpsSimulatorService();
-  double currentLat = -12.0847;
-  double currentLng = -77.0315;
+  final MapController _mapController = MapController();
+  double currentLat = -12.0686;
+  double currentLng = -75.2100;
   bool isInsideGeofence = true;
   List<dynamic> rutaOptimizada = [];
 
@@ -145,13 +148,102 @@ class _OptimizacionRutaScreenState extends State<OptimizacionRutaScreen> {
                     children: [
                       // Grid y Painter del Mapa
                       Positioned.fill(
-                        child: CustomPaint(
-                          painter: _MapVectorPainter(
-                            advisorLat: currentLat,
-                            advisorLng: currentLng,
-                            geofence: _gpsService.geocercaAsesor,
-                            clients: rutaOptimizada,
+                        child: FlutterMap(
+                          mapController: _mapController,
+                          options: MapOptions(
+                            initialCenter: LatLng(currentLat, currentLng),
+                            initialZoom: 12.0,
+                            minZoom: 3.0,
+                            maxZoom: 18.0,
+                            interactionOptions: const InteractionOptions(
+                              flags: InteractiveFlag.all,
+                            ),
                           ),
+                          children: [
+                            TileLayer(
+                              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                              userAgentPackageName: 'com.bancoandino.fuerzaventas',
+                            ),
+                            PolygonLayer(
+                              polygons: [
+                                Polygon(
+                                  points: _gpsService.geocercaAsesor
+                                      .map((gp) => LatLng(gp.lat, gp.lng))
+                                      .toList(),
+                                  color: AppTheme.bcpCyan.withOpacity(0.12),
+                                  borderColor: AppTheme.neonCyan.withOpacity(0.6),
+                                  borderStrokeWidth: 2.5,
+                                  isFilled: true,
+                                ),
+                              ],
+                            ),
+                            PolylineLayer(
+                              polylines: [
+                                Polyline(
+                                  points: [
+                                    LatLng(currentLat, currentLng),
+                                    ...rutaOptimizada
+                                        .where((item) => item.latitud != null && item.longitud != null)
+                                        .map((item) => LatLng(item.latitud, item.longitud))
+                                        .toList(),
+                                  ],
+                                  color: AppTheme.neonOrange.withOpacity(0.85),
+                                  strokeWidth: 3.5,
+                                ),
+                              ],
+                            ),
+                            MarkerLayer(
+                              markers: [
+                                // Advisor Marker
+                                Marker(
+                                  point: LatLng(currentLat, currentLng),
+                                  width: 44,
+                                  height: 44,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.neonCyan.withOpacity(0.25),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: Colors.white, width: 1.5),
+                                      boxShadow: AppTheme.neonGlowShadow(color: AppTheme.neonCyan, opacity: 0.4, blurRadius: 10),
+                                    ),
+                                    child: const Center(
+                                      child: Icon(Icons.navigation_rounded, color: AppTheme.neonCyan, size: 18),
+                                    ),
+                                  ),
+                                ),
+                                // Client Markers
+                                ...List.generate(rutaOptimizada.length, (index) {
+                                  final item = rutaOptimizada[index];
+                                  final lat = item.latitud;
+                                  final lng = item.longitud;
+                                  if (lat == null || lng == null) return Marker(point: LatLng(0, 0), child: const SizedBox.shrink());
+                                  return Marker(
+                                    point: LatLng(lat, lng),
+                                    width: 32,
+                                    height: 32,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.neonOrange,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: Colors.white, width: 1.5),
+                                        boxShadow: AppTheme.neonGlowShadow(color: AppTheme.neonOrange, opacity: 0.4, blurRadius: 8),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          '${index + 1}',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }).where((m) => m.point.latitude != 0.0).toList(),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                       // Leyenda del mapa flotante
@@ -244,10 +336,11 @@ class _OptimizacionRutaScreenState extends State<OptimizacionRutaScreen> {
                                 child: ElevatedButton.icon(
                                   onPressed: () {
                                     setState(() {
-                                      currentLat = -12.0870;
-                                      currentLng = -77.0310;
+                                      currentLat = -12.0686;
+                                      currentLng = -75.2100;
                                       _recalcularRuta();
                                     });
+                                    _mapController.move(LatLng(currentLat, currentLng), 13.0);
                                   },
                                   icon: const Icon(Icons.location_on_rounded, color: AppTheme.neonGreen),
                                   label: const Text('Simular Dentro', style: TextStyle(color: Colors.white, fontSize: 13)),
@@ -271,10 +364,11 @@ class _OptimizacionRutaScreenState extends State<OptimizacionRutaScreen> {
                                 child: ElevatedButton.icon(
                                   onPressed: () {
                                     setState(() {
-                                      currentLat = -12.1200;
-                                      currentLng = -77.0100;
+                                      currentLat = -12.0847;
+                                      currentLng = -77.0315;
                                       _recalcularRuta();
                                     });
+                                    _mapController.move(LatLng(currentLat, currentLng), 9.0);
                                   },
                                   icon: const Icon(Icons.navigation_rounded, color: AppTheme.neonRed),
                                   label: const Text('Simular Fuera', style: TextStyle(color: Colors.white, fontSize: 13)),
@@ -422,131 +516,3 @@ class _OptimizacionRutaScreenState extends State<OptimizacionRutaScreen> {
   }
 }
 
-// Pintor del Mapa Vectorial Cyberpunk
-class _MapVectorPainter extends CustomPainter {
-  final double advisorLat;
-  final double advisorLng;
-  final List<GpsPoint> geofence;
-  final List<dynamic> clients;
-
-  _MapVectorPainter({
-    required this.advisorLat,
-    required this.advisorLng,
-    required this.geofence,
-    required this.clients,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Límites de coordenadas para mapeo
-    const double minLat = -12.1300;
-    const double maxLat = -12.0700;
-    const double minLng = -77.0500;
-    const double maxLng = -77.0000;
-
-    double mapX(double lng) {
-      return size.width * (lng - minLng) / (maxLng - minLng);
-    }
-
-    double mapY(double lat) {
-      return size.height * (maxLat - lat) / (maxLat - minLat);
-    }
-
-    // Dibujar cuadrícula de calles de fondo estilo matriz tecnológica
-    final gridPaint = Paint()
-      ..color = Colors.white.withOpacity(0.025)
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke;
-
-    for (int i = 0; i < size.width; i += 30) {
-      canvas.drawLine(Offset(i.toDouble(), 0), Offset(i.toDouble(), size.height), gridPaint);
-    }
-    for (int j = 0; j < size.height; j += 30) {
-      canvas.drawLine(Offset(0, j.toDouble()), Offset(size.width, j.toDouble()), gridPaint);
-    }
-
-    // Dibujar calles diagonales simuladas
-    final streetPaint = Paint()
-      ..color = Colors.white.withOpacity(0.015)
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke;
-    canvas.drawLine(Offset(0, size.height * 0.2), Offset(size.width, size.height * 0.8), streetPaint);
-    canvas.drawLine(Offset(size.width * 0.2, 0), Offset(size.width * 0.8, size.height), streetPaint);
-
-    // Dibujar Geocerca (Polígono con relleno semitransparente neón)
-    if (geofence.isNotEmpty) {
-      final geofencePaint = Paint()
-        ..color = AppTheme.bcpCyan.withOpacity(0.05)
-        ..style = PaintingStyle.fill;
-
-      final geofenceBorderPaint = Paint()
-        ..color = AppTheme.neonCyan.withOpacity(0.35)
-        ..strokeWidth = 2
-        ..style = PaintingStyle.stroke;
-
-      final path = Path();
-      path.moveTo(mapX(geofence[0].lng), mapY(geofence[0].lat));
-      for (int i = 1; i < geofence.length; i++) {
-        path.lineTo(mapX(geofence[i].lng), mapY(geofence[i].lat));
-      }
-      path.close();
-
-      canvas.drawPath(path, geofencePaint);
-      canvas.drawPath(path, geofenceBorderPaint);
-    }
-
-    // Dibujar Ruta Conectora de Clientes (Línea degradada/brillante de ruta)
-    final routePaint = Paint()
-      ..color = AppTheme.neonOrange.withOpacity(0.7)
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-
-    double currentX = mapX(advisorLng);
-    double currentY = mapY(advisorLat);
-
-    for (final client in clients) {
-      if (client.latitud != null && client.longitud != null) {
-        final double nextX = mapX(client.longitud);
-        final double nextY = mapY(client.latitud);
-
-        canvas.drawLine(Offset(currentX, currentY), Offset(nextX, nextY), routePaint);
-        currentX = nextX;
-        currentY = nextY;
-      }
-    }
-
-    // Dibujar Nodos Clientes (Naranja neón con halo de brillo)
-    final clientPaint = Paint()..color = AppTheme.neonOrange;
-    final clientGlow = Paint()
-      ..color = AppTheme.neonOrange.withOpacity(0.3)
-      ..style = PaintingStyle.fill;
-
-    for (final client in clients) {
-      if (client.latitud != null && client.longitud != null) {
-        final double cx = mapX(client.longitud);
-        final double cy = mapY(client.latitud);
-        
-        canvas.drawCircle(Offset(cx, cy), 9, clientGlow);
-        canvas.drawCircle(Offset(cx, cy), 5, clientPaint);
-        canvas.drawCircle(Offset(cx, cy), 2, Paint()..color = Colors.white);
-      }
-    }
-
-    // Dibujar ubicación del Asesor (Cyan BCP con doble resplandor)
-    final advisorPaint = Paint()..color = AppTheme.neonCyan;
-    final advisorGlow = Paint()
-      ..color = AppTheme.neonCyan.withOpacity(0.4)
-      ..style = PaintingStyle.fill;
-
-    final double ax = mapX(advisorLng);
-    final double ay = mapY(advisorLat);
-
-    canvas.drawCircle(Offset(ax, ay), 12, advisorGlow);
-    canvas.drawCircle(Offset(ax, ay), 7, advisorPaint);
-    canvas.drawCircle(Offset(ax, ay), 3.5, Paint()..color = Colors.white);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
