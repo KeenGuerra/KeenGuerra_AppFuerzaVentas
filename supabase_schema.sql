@@ -2,6 +2,17 @@
 -- ESQUEMA DE BASE DE DATOS PARA SUPABASE (ecosistema Banco Andino)
 -- ====================================================================
 
+-- Limpiar tablas antiguas si existen para evitar conflictos de columnas
+DROP TABLE IF EXISTS transmisiones CASCADE;
+DROP TABLE IF EXISTS documentos CASCADE;
+DROP TABLE IF EXISTS historial_crediticio CASCADE;
+DROP TABLE IF EXISTS productos_activos CASCADE;
+DROP TABLE IF EXISTS buro_credito CASCADE;
+DROP TABLE IF EXISTS solicitudes_credito CASCADE;
+DROP TABLE IF EXISTS cartera_diaria CASCADE;
+DROP TABLE IF EXISTS clientes CASCADE;
+DROP TABLE IF EXISTS oficiales CASCADE;
+
 -- 1. Tabla de Oficiales de Crédito
 CREATE TABLE IF NOT EXISTS oficiales (
     id VARCHAR(100) PRIMARY KEY,
