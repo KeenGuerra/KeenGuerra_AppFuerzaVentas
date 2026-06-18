@@ -16,10 +16,13 @@ DROP TABLE IF EXISTS oficiales CASCADE;
 -- 1. Tabla de Oficiales de Crédito
 CREATE TABLE IF NOT EXISTS oficiales (
     id VARCHAR(100) PRIMARY KEY,
+    auth_user_id UUID UNIQUE,
     codigo_empleado VARCHAR(50) UNIQUE NOT NULL,
-    clave VARCHAR(100) NOT NULL,
-    nombre_completo VARCHAR(150) NOT NULL,
+    nombres VARCHAR(100) NOT NULL,
+    apellidos VARCHAR(100) NOT NULL,
+    agencia VARCHAR(100),
     cargo VARCHAR(50) NOT NULL DEFAULT 'OPERADOR',
+    estado VARCHAR(50) NOT NULL DEFAULT 'ACTIVO',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -124,10 +127,11 @@ CREATE TABLE IF NOT EXISTS transmisiones (
 -- ====================================================================
 
 -- Insertar Asesores (Oficiales de Negocio)
-INSERT INTO oficiales (id, codigo_empleado, clave, nombre_completo, cargo)
+-- NOTA: El auth_user_id es el UUID generado en Supabase Auth para ofi001@fuerzaventas.local
+INSERT INTO oficiales (id, auth_user_id, codigo_empleado, nombres, apellidos, agencia, cargo, estado)
 VALUES 
-('ofi_001', 'ofi001', 'supabase123', 'Luis Alberto Bazán', 'SUPER OPERADOR')
-ON CONFLICT (id) DO UPDATE SET nombre_completo = EXCLUDED.nombre_completo;
+('ofi_001', '7fa82fce-271d-49fa-8aca-5e4e80d1ec77', 'ofi001', 'Luis Alberto', 'Bazán', 'Huancayo', 'SUPER OPERADOR', 'ACTIVO')
+ON CONFLICT (id) DO UPDATE SET auth_user_id = EXCLUDED.auth_user_id, nombres = EXCLUDED.nombres, apellidos = EXCLUDED.apellidos;
 
 -- Sembrar Clientes para los casos de práctica
 INSERT INTO clientes (id, oficial_id, dni, nombres, apellidos, telefono, direccion, negocio, actividad_economica, latitud, longitud, estado)
