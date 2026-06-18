@@ -199,3 +199,39 @@ VALUES
 ('41884084', 'Préstamo Personal', 25000.00),
 ('43334034', 'Crédito Pyme', 25000.00)
 ON CONFLICT (id) DO NOTHING;
+
+-- Sembrar Cartera Diaria para que aparezcan clientes en el listado del Oficial
+INSERT INTO cartera_diaria (id, oficial_id, cliente_id, fecha, tipo_gestion, estado, prioridad, observacion)
+VALUES
+('cart_40118120', 'ofi_001', '40118120', CURRENT_DATE, 'NUEVA_SOLICITUD', 'Pendiente', 3, 'Caso 1: Solicita capital de trabajo para Bodega Don Anaxi. Alta prioridad.'),
+('cart_41223341', 'ofi_001', '41223341', CURRENT_DATE, 'Cobranza', 'Pendiente', 2, 'Caso 2: Cobranza de cuota vencida de Picanteria La Eulalia.'),
+('cart_42330336', 'ofi_001', '42330336', CURRENT_DATE, 'Renovación', 'Pendiente', 1, 'Caso 3: Renovación de línea de crédito para Maderas Huaman.'),
+('cart_43440349', 'ofi_001', '43440349', CURRENT_DATE, 'NUEVA_SOLICITUD', 'Pendiente', 2, 'Caso 4: Ampliación de local para Distribuidora Casandra.'),
+('cart_40556071', 'ofi_001', '40556071', CURRENT_DATE, 'Cobranza', 'Visitado', 1, 'Caso 5: Visita de rutina a Ferreteria El Constructor.'),
+('cart_41669066', 'ofi_001', '41669066', CURRENT_DATE, 'Renovación', 'Pendiente', 2, 'Caso 6: Renovación de campaña escolar para Confecciones Hipatia.'),
+('cart_43773379', 'ofi_001', '43773379', CURRENT_DATE, 'NUEVA_SOLICITUD', 'Pendiente', 3, 'Caso 7: Compra de camión para Transportes Anibal.'),
+('cart_40886086', 'ofi_001', '40886086', CURRENT_DATE, 'Cobranza', 'Pendiente', 1, 'Caso 8: Inspección de granja avícola para Penelope Apaza.'),
+('cart_41990091', 'ofi_001', '41990091', CURRENT_DATE, 'Renovación', 'Pendiente', 2, 'Caso 9: Campaña navideña para Importaciones Heraclito.'),
+('cart_43003039', 'ofi_001', '43003039', CURRENT_DATE, 'NUEVA_SOLICITUD', 'Pendiente', 1, 'Caso 10: Adquisición de vitrinas para Botica Cleopatra.'),
+('cart_40110010', 'ofi_001', '40110010', CURRENT_DATE, 'Cobranza', 'Pendiente', 2, 'Caso 11: Cobranza de saldo vencido para Minimarket Esquilo.'),
+('cart_41226021', 'ofi_001', '41226021', CURRENT_DATE, 'Renovación', 'Pendiente', 3, 'Caso 12: Renovación de equipos para Estilos Ariadna.'),
+('cart_43336033', 'ofi_001', '43336033', CURRENT_DATE, 'NUEVA_SOLICITUD', 'Pendiente', 2, 'Caso 13: Horno industrial para Panaderia Sofocles.'),
+('cart_40550055', 'ofi_001', '40550055', CURRENT_DATE, 'Cobranza', 'Visitado', 1, 'Caso 14: Registro de taller mecánico Casiopea.'),
+('cart_41669166', 'ofi_001', '41669166', CURRENT_DATE, 'Renovación', 'Pendiente', 2, 'Caso 15: Campaña agrícola para Insumos Aristofanes.'),
+('cart_43880088', 'ofi_001', '43880088', CURRENT_DATE, 'NUEVA_SOLICITUD', 'Pendiente', 3, 'Caso 16: Compra de lote de calzado para Calzados Calipso.'),
+('cart_40119019', 'ofi_001', '40119019', CURRENT_DATE, 'Cobranza', 'Pendiente', 1, 'Caso 17: Supervisión de mercadería para Mayorista Demetrio.'),
+('cart_41226126', 'ofi_001', '41226126', CURRENT_DATE, 'Renovación', 'Pendiente', 2, 'Caso 18: Ampliación de salón de eventos para Recreo Antigona.'),
+('cart_43339033', 'ofi_001', '43339033', CURRENT_DATE, 'NUEVA_SOLICITUD', 'Pendiente', 3, 'Caso 19: Adquisición de fierros de construcción para Ferreteria Pitagoras.'),
+('cart_40556056', 'ofi_001', '40556056', CURRENT_DATE, 'Cobranza', 'Pendiente', 1, 'Caso 20: Visita de cobranza preventiva para Tejidos Berenice.'),
+('cart_43889089', 'ofi_001', '43889089', CURRENT_DATE, 'Renovación', 'Pendiente', 2, 'Caso 21: Renovación de unidad de reparto para Carga Anaxagoras.'),
+('cart_41003001', 'ofi_001', '41003001', CURRENT_DATE, 'NUEVA_SOLICITUD', 'Pendiente', 1, 'Caso 22: Compra de alimento balanceado para Avicola Climene.'),
+('cart_40115011', 'ofi_001', '40115011', CURRENT_DATE, 'Cobranza', 'Pendiente', 2, 'Caso 23: Cobranza de cuota 3 para Bodega Epaminondas.'),
+('cart_41336036', 'ofi_001', '41336036', CURRENT_DATE, 'Renovación', 'Pendiente', 3, 'Caso 24: Compra de mercadería importada para Variedades Lisistrata.'),
+('cart_41552052', 'ofi_001', '41552052', CURRENT_DATE, 'NUEVA_SOLICITUD', 'Pendiente', 2, 'Caso 25: Remodelación de cocina para Cevicheria Filoctetes.'),
+('cart_41888088', 'ofi_001', '41888088', CURRENT_DATE, 'Cobranza', 'Visitado', 1, 'Caso 26: Cobranza de cuota de local para Calzados Calirroe.'),
+('cart_42220022', 'ofi_001', '42220022', CURRENT_DATE, 'Renovación', 'Pendiente', 2, 'Caso 27: Renovación de stock de fierros para Ferreteria Tucidides.'),
+('cart_43337037', 'ofi_001', '43337037', CURRENT_DATE, 'NUEVA_SOLICITUD', 'Pendiente', 3, 'Caso 28: Compra de mercadería mayorista para Comercial Aquiles.'),
+('cart_41884084', 'ofi_001', '41884084', CURRENT_DATE, 'Cobranza', 'Pendiente', 1, 'Caso 29: Cobranza de saldo vencido para Bodega Medea.'),
+('cart_43334034', 'ofi_001', '43334034', CURRENT_DATE, 'Renovación', 'Pendiente', 2, 'Caso 30: Renovación de camión de fletes para Esquines Rojas.')
+ON CONFLICT (id) DO NOTHING;
+
