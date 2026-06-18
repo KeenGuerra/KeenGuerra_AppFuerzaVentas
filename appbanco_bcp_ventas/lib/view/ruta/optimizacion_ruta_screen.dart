@@ -165,23 +165,31 @@ class _OptimizacionRutaScreenState extends State<OptimizacionRutaScreen> {
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(color: Colors.white12, width: 1),
                           ),
-                          child: const Row(
+                          child: Row(
                             children: [
-                              CircleAvatar(
-                                radius: 4, 
-                                backgroundColor: AppTheme.neonOrange,
-                                boxShadow: [BoxShadow(color: AppTheme.neonOrange, blurRadius: 4)],
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: AppTheme.neonOrange,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [BoxShadow(color: AppTheme.neonOrange, blurRadius: 4)],
+                                ),
                               ),
-                              SizedBox(width: 6),
-                              Text('Clientes', style: TextStyle(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.bold)),
-                              SizedBox(width: 14),
-                              CircleAvatar(
-                                radius: 4, 
-                                backgroundColor: AppTheme.neonCyan,
-                                boxShadow: [BoxShadow(color: AppTheme.neonCyan, blurRadius: 4)],
+                              const SizedBox(width: 6),
+                              const Text('Clientes', style: TextStyle(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.bold)),
+                              const SizedBox(width: 14),
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: AppTheme.neonCyan,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [BoxShadow(color: AppTheme.neonCyan, blurRadius: 4)],
+                                ),
                               ),
-                              SizedBox(width: 6),
-                              Text('Tu Ubicación', style: TextStyle(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.bold)),
+                              const SizedBox(width: 6),
+                              const Text('Tu Ubicación', style: TextStyle(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
