@@ -21,6 +21,9 @@ class OfflineStorageService {
       destinoCredito: solicitud.destinoCredito,
       estado: 'BORRADOR',
       syncStatus: 'PENDIENTE',
+      tea: solicitud.tea,
+      garantia: solicitud.garantia,
+      seguroDesgravamen: solicitud.seguroDesgravamen,
     );
     _drafts.add(borrador);
   }

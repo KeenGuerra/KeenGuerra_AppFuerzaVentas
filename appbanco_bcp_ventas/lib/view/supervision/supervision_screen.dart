@@ -80,9 +80,9 @@ class _SupervisionScreenState extends State<SupervisionScreen> {
               // Panel de Resumen
               Container(
                 decoration: BoxDecoration(
-                  color: AppTheme.cardDark.withOpacity(0.9),
+                  color: AppTheme.cardDark.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.2),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.04), width: 1.2),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(18.0),
@@ -139,9 +139,9 @@ class _SupervisionScreenState extends State<SupervisionScreen> {
                 height: 180,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppTheme.cardDark.withOpacity(0.9),
+                  color: AppTheme.cardDark.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.2),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.04), width: 1.2),
                 ),
                 child: CustomPaint(
                   painter: _BarChartPainter(),
@@ -169,9 +169,9 @@ class _SupervisionScreenState extends State<SupervisionScreen> {
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
-                      color: AppTheme.cardDark.withOpacity(0.9),
+                      color: AppTheme.cardDark.withValues(alpha: 0.9),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.2),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.04), width: 1.2),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -262,7 +262,7 @@ class _BarChartPainter extends CustomPainter {
 
     // Líneas horizontales de fondo
     final gridPaint = Paint()
-      ..color = Colors.white.withOpacity(0.05)
+      ..color = Colors.white.withValues(alpha: 0.05)
       ..strokeWidth = 1;
 
     for (double i = 0.0; i <= 1.0; i += 0.25) {

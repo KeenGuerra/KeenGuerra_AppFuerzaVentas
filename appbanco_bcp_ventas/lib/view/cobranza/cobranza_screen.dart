@@ -128,10 +128,10 @@ class _CobranzaScreenState extends State<CobranzaScreen> {
                           return Container(
                             margin: const EdgeInsets.only(bottom: 8),
                             decoration: BoxDecoration(
-                              color: isSelected ? AppTheme.bcpOrange.withOpacity(0.12) : AppTheme.cardDark.withOpacity(0.6),
+                              color: isSelected ? AppTheme.bcpOrange.withValues(alpha: 0.12) : AppTheme.cardDark.withValues(alpha: 0.6),
                               borderRadius: BorderRadius.circular(18),
                               border: Border.all(
-                                color: isSelected ? AppTheme.bcpOrange : Colors.white.withOpacity(0.04),
+                                color: isSelected ? AppTheme.bcpOrange : Colors.white.withValues(alpha: 0.04),
                                 width: 1.2,
                               ),
                             ),
@@ -152,7 +152,7 @@ class _CobranzaScreenState extends State<CobranzaScreen> {
                               trailing: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: cli['moraDias'] > 15 ? Colors.red.withOpacity(0.15) : Colors.amber.withOpacity(0.15),
+                                  color: cli['moraDias'] > 15 ? Colors.red.withValues(alpha: 0.15) : Colors.amber.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
                                     color: cli['moraDias'] > 15 ? Colors.redAccent : Colors.amberAccent,
@@ -188,9 +188,9 @@ class _CobranzaScreenState extends State<CobranzaScreen> {
                     : SingleChildScrollView(
                         child: Container(
                           decoration: BoxDecoration(
-                            color: AppTheme.cardDark.withOpacity(0.9),
+                            color: AppTheme.cardDark.withValues(alpha: 0.9),
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.2),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.04), width: 1.2),
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(18.0),
@@ -217,7 +217,7 @@ class _CobranzaScreenState extends State<CobranzaScreen> {
                                 const SizedBox(height: 12),
 
                                 DropdownButtonFormField<String>(
-                                  value: selectedAccion,
+                                  initialValue: selectedAccion,
                                   dropdownColor: AppTheme.cardDark,
                                   style: const TextStyle(color: Colors.white, fontSize: 13.5),
                                   decoration: const InputDecoration(labelText: 'Tipo de Acción'),
@@ -297,9 +297,9 @@ class _CobranzaScreenState extends State<CobranzaScreen> {
                                     return Container(
                                       margin: const EdgeInsets.only(bottom: 8),
                                       decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.02),
+                                        color: Colors.white.withValues(alpha: 0.02),
                                         borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(color: Colors.white.withOpacity(0.02)),
+                                        border: Border.all(color: Colors.white.withValues(alpha: 0.02)),
                                       ),
                                       child: ListTile(
                                         title: Text(a['tipo'], style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13)),

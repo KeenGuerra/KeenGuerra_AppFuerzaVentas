@@ -105,6 +105,7 @@ class _NuevaSolicitudScreenState extends State<NuevaSolicitudScreen> {
       destinoCredito: _giroController.text,
       estado: 'BORRADOR',
       syncStatus: 'PENDIENTE',
+      tea: double.tryParse(_teaController.text) ?? 28.5,
     );
 
     await _offlineService.guardarBorrador(borrador);
@@ -137,8 +138,9 @@ class _NuevaSolicitudScreenState extends State<NuevaSolicitudScreen> {
       montoSolicitado: double.tryParse(_montoController.text) ?? 0.0,
       plazoMeses: int.tryParse(_plazoController.text) ?? 12,
       destinoCredito: _giroController.text,
-      estado: 'REGISTRADA',
+      estado: 'enviado',
       syncStatus: 'SINCRONIZADO',
+      tea: double.tryParse(_teaController.text) ?? 28.5,
     );
 
     await solicitudViewModel.registrarSolicitud(nuevaSolicitud);

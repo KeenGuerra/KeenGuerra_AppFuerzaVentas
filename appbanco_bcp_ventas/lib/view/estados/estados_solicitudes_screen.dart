@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../../ui/theme/app_theme.dart';
+import '../../viewmodel/auth_oficial_viewmodel.dart';
+import '../../viewmodel/solicitud_viewmodel.dart';
+import '../../model/solicitud_credito_model.dart';
 
 class EstadosSolicitudesScreen extends StatefulWidget {
   const EstadosSolicitudesScreen({super.key});
@@ -10,64 +15,30 @@ class EstadosSolicitudesScreen extends StatefulWidget {
 
 class _EstadosSolicitudesScreenState extends State<EstadosSolicitudesScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-
-  final List<Map<String, dynamic>> solicitudesSimuladas = [
-    {
-      'id': 'SOL001',
-      'cliente': 'Jorge Luis Bazán',
-      'monto': 15000,
-      'estado': 'Evaluación',
-      'fecha': '04/06/2026',
-      'timeline': [
-        {'fecha': '04/06 09:00', 'desc': 'Solicitud registrada por Asesor'},
-        {'fecha': '04/06 11:30', 'desc': 'Score SBS Evaluado: 710 (Bajo Riesgo)'},
-        {'fecha': '04/06 14:00', 'desc': 'Asignado a Analista de Riesgos'},
-      ]
-    },
-    {
-      'id': 'SOL002',
-      'cliente': 'María Elena Flores',
-      'monto': 8000,
-      'estado': 'Comité',
-      'fecha': '03/06/2026',
-      'timeline': [
-        {'fecha': '03/06 10:15', 'desc': 'Solicitud registrada'},
-        {'fecha': '03/06 12:00', 'desc': 'Documentación validada al 100%'},
-        {'fecha': '04/06 09:30', 'desc': 'Elevado a Comité Zonal para aprobación'},
-      ]
-    },
-    {
-      'id': 'SOL003',
-      'cliente': 'Carlos Alberto Ruiz',
-      'monto': 12000,
-      'estado': 'Aprobada',
-      'fecha': '02/06/2026',
-      'timeline': [
-        {'fecha': '02/06 08:30', 'desc': 'Solicitud registrada'},
-        {'fecha': '02/06 15:45', 'desc': 'Aprobación automática de riesgo'},
-        {'fecha': '03/06 11:00', 'desc': 'Aprobación final por Comité de Crédito'},
-      ]
-    },
-    {
-      'id': 'SOL004',
-      'cliente': 'Roberto Gómez',
-      'monto': 20000,
-      'estado': 'Registrada',
-      'fecha': '04/06/2026',
-      'timeline': [
-        {'fecha': '04/06 15:30', 'desc': 'Solicitud registrada en Borrador Sincronizado'},
-      ]
-    },
-  ];
-
-  Map<String, dynamic>? selectedSolicitud;
+  SolicitudCreditoModel? _selectedSolicitud;
+  bool _initialized = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    if (solicitudesSimuladas.isNotEmpty) {
-      selectedSolicitud = solicitudesSimuladas.first;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      final oficialId = context.read<AuthOficialViewModel>().oficial?.id ?? 'ofi_local';
+      Future.microtask(() async {
+        await context.read<SolicitudViewModel>().cargarSolicitudes(oficialId);
+        final list = context.read<SolicitudViewModel>().solicitudes;
+        if (list.isNotEmpty) {
+          setState(() {
+            _selectedSolicitud = list.first;
+          });
+        }
+      });
+      _initialized = true;
     }
   }
 
@@ -77,13 +48,65 @@ class _EstadosSolicitudesScreenState extends State<EstadosSolicitudesScreen> wit
     super.dispose();
   }
 
+  List<Map<String, dynamic>> _generarTimeline(SolicitudCreditoModel s) {
+    List<Map<String, dynamic>> timeline = [];
+
+    // Paso 1: Registro
+    timeline.add({
+      'fecha': 'Registro Inicial',
+      'desc': 'Solicitud registrada por el cliente en App Clientes. Canal: Móvil.',
+    });
+
+    final est = s.estado.toLowerCase();
+
+    if (est == 'recibido_comite' || est == 'en_evaluacion' || est == 'aprobado' || est == 'condicionado' || est == 'desembolsado' || est == 'rechazado') {
+      timeline.add({
+        'fecha': 'Comité de Crédito',
+        'desc': 'Expediente promovido y recibido por el Comité de Riesgos Zonal.',
+      });
+    }
+
+    if (est == 'en_evaluacion' || est == 'aprobado' || est == 'condicionado' || est == 'desembolsado' || est == 'rechazado') {
+      timeline.add({
+        'fecha': 'En Evaluación',
+        'desc': 'Analista de Riesgos evaluando capacidad de pago y reporte de buró SBS.',
+      });
+    }
+
+    if (est == 'aprobado') {
+      timeline.add({
+        'fecha': 'Aprobado',
+        'desc': 'Solicitud APROBADA al 100% sobre el monto solicitado de S/ ${s.montoSolicitado}.',
+      });
+    } else if (est == 'condicionado') {
+      timeline.add({
+        'fecha': 'Condicionado',
+        'desc': 'Aprobación condicionada por el comité. Se autoriza monto reducido para seguimiento.',
+      });
+    } else if (est == 'rechazado') {
+      timeline.add({
+        'fecha': 'Rechazado',
+        'desc': 'Expediente rechazado por políticas de riesgo. Motivo: ${s.motivoRechazo ?? 'No especificado'}',
+      });
+    } else if (est == 'desembolsado') {
+      timeline.add({
+        'fecha': 'Desembolsado',
+        'desc': 'Fondos desembolsados y liquidados. Cronograma de cuotas francesas generado con éxito.',
+      });
+    }
+
+    return timeline.reversed.toList();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final solicitudViewModel = context.watch<SolicitudViewModel>();
+
     return Scaffold(
       backgroundColor: AppTheme.darkBackground,
       appBar: AppBar(
-        title: const Text('Estados de Solicitud'),
-        backgroundColor: AppTheme.bcpBlue,
+        title: const Text('Tablero de Solicitudes'),
+        backgroundColor: AppTheme.darkBackground,
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: AppTheme.bcpOrange,
@@ -91,7 +114,7 @@ class _EstadosSolicitudesScreenState extends State<EstadosSolicitudesScreen> wit
           unselectedLabelColor: Colors.white60,
           tabs: const [
             Tab(icon: Icon(Icons.dashboard_outlined), text: 'Tablero Kanban'),
-            Tab(icon: Icon(Icons.timeline_outlined), text: 'Timeline Historial'),
+            Tab(icon: Icon(Icons.history_edu_rounded), text: 'Historial / Timeline'),
           ],
         ),
       ),
@@ -102,33 +125,42 @@ class _EstadosSolicitudesScreenState extends State<EstadosSolicitudesScreen> wit
         child: TabBarView(
           controller: _tabController,
           children: [
-            _buildKanbanTab(),
-            _buildTimelineTab(),
+            _buildKanbanTab(solicitudViewModel.solicitudes),
+            _buildTimelineTab(solicitudViewModel.solicitudes),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildKanbanTab() {
-    final estados = ['Registrada', 'Evaluación', 'Comité', 'Aprobada'];
+  Widget _buildKanbanTab(List<SolicitudCreditoModel> solicitudes) {
+    // Columnas Kanban
+    final columnas = [
+      {'nombre': 'Enviados', 'estados': ['enviado', 'recibido_comite']},
+      {'nombre': 'En Evaluación', 'estados': ['en_evaluacion']},
+      {'nombre': 'Decisión Zonal', 'estados': ['aprobado', 'condicionado']},
+      {'nombre': 'Finalizados', 'estados': ['desembolsado', 'rechazado']},
+    ];
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.all(16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: estados.map((estado) {
-          final filtrados = solicitudesSimuladas.where((s) => s['estado'] == estado).toList();
+        children: columnas.map((col) {
+          final nombreCol = col['nombre'] as String;
+          final estadosFiltro = col['estados'] as List<String>;
+          
+          final filtrados = solicitudes.where((s) => estadosFiltro.contains(s.estado.toLowerCase())).toList();
 
           return Container(
-            width: 280,
+            width: 290,
             margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppTheme.cardDark.withOpacity(0.9),
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.2),
+            padding: const EdgeInsets.all(16),
+            decoration: AppTheme.glassDecoration(
+              color: AppTheme.cardDark,
+              opacity: 0.85,
+              borderRadius: 24,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,87 +171,111 @@ class _EstadosSolicitudesScreenState extends State<EstadosSolicitudesScreen> wit
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      estado,
+                      nombreCol,
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
+                        letterSpacing: 0.3,
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
                         color: AppTheme.bcpOrange.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
                         '${filtrados.length}',
-                        style: const TextStyle(color: AppTheme.bcpOrange, fontSize: 11, fontWeight: FontWeight.bold),
+                        style: const TextStyle(color: AppTheme.neonOrange, fontSize: 11, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                const Divider(color: Colors.white12, height: 1),
-                const SizedBox(height: 12),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12.0),
+                  child: Divider(color: Colors.white10, height: 1),
+                ),
 
-                // Lista de tarjetas
-                ...filtrados.map((s) {
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.03),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white.withOpacity(0.03)),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(14),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // Lista de tarjetas en scroll vertical dentro de la columna
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 450),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: filtrados.length,
+                    itemBuilder: (context, idx) {
+                      final s = filtrados[idx];
+                      
+                      Color tagColor = AppTheme.bcpCyan;
+                      if (s.estado == 'desembolsado') tagColor = AppTheme.neonGreen;
+                      if (s.estado == 'rechazado') tagColor = AppTheme.neonRed;
+                      if (s.estado == 'aprobado' || s.estado == 'condicionado') tagColor = Colors.amberAccent;
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.02),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: Colors.white.withOpacity(0.03)),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    s.id ?? 'SOL_ID',
+                                    style: const TextStyle(
+                                      color: AppTheme.neonCyan,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12.5,
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: tagColor.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: tagColor.withOpacity(0.3)),
+                                    ),
+                                    child: Text(
+                                      s.estado.toUpperCase(),
+                                      style: TextStyle(color: tagColor, fontWeight: FontWeight.bold, fontSize: 8),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
                               Text(
-                                s['id'],
+                                'Monto: S/ ${s.montoSolicitado}',
                                 style: const TextStyle(
-                                  color: AppTheme.bcpCyan,
+                                  color: Colors.white,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 12,
+                                  fontSize: 14,
                                 ),
                               ),
+                              const SizedBox(height: 4),
                               Text(
-                                s['fecha'],
-                                style: const TextStyle(color: Colors.white38, fontSize: 11),
+                                'Plazo: ${s.plazoMeses} meses • TEA: ${s.tea}%',
+                                style: const TextStyle(color: Colors.white54, fontSize: 12),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            s['cliente'],
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Monto: S/ ${s['monto']}',
-                            style: const TextStyle(color: Colors.white70, fontSize: 12.5),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
+                        ),
+                      );
+                    },
+                  ),
+                ),
 
                 if (filtrados.isEmpty)
                   const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 24.0),
+                    padding: EdgeInsets.symmetric(vertical: 30.0),
                     child: Center(
                       child: Text(
-                        'Sin solicitudes',
+                        'Sin solicitudes en esta fase.',
                         style: TextStyle(color: Colors.white24, fontSize: 12),
                       ),
                     ),
@@ -232,7 +288,16 @@ class _EstadosSolicitudesScreenState extends State<EstadosSolicitudesScreen> wit
     );
   }
 
-  Widget _buildTimelineTab() {
+  Widget _buildTimelineTab(List<SolicitudCreditoModel> solicitudes) {
+    if (solicitudes.isEmpty) {
+      return const Center(
+        child: Text('No hay solicitudes registradas.', style: TextStyle(color: Colors.white38)),
+      );
+    }
+
+    final currentSelected = _selectedSolicitud ?? solicitudes.first;
+    final timelineEvents = _generarTimeline(currentSelected);
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
@@ -240,35 +305,34 @@ class _EstadosSolicitudesScreenState extends State<EstadosSolicitudesScreen> wit
         children: [
           // Selector izquierdo de Solicitud
           Expanded(
-            flex: 2,
+            flex: 4,
             child: ListView.builder(
-              itemCount: solicitudesSimuladas.length,
+              itemCount: solicitudes.length,
               itemBuilder: (context, index) {
-                final s = solicitudesSimuladas[index];
-                final isSelected = selectedSolicitud?['id'] == s['id'];
+                final s = solicitudes[index];
+                final isSelected = currentSelected.id == s.id;
 
                 return Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  decoration: BoxDecoration(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  decoration: AppTheme.glassDecoration(
                     color: isSelected ? AppTheme.bcpOrange.withOpacity(0.12) : AppTheme.cardDark.withOpacity(0.6),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isSelected ? AppTheme.bcpOrange : Colors.white.withOpacity(0.04),
-                      width: 1.2,
-                    ),
+                    opacity: 0.85,
+                    borderRadius: 18,
+                    borderColor: isSelected ? AppTheme.bcpOrange : Colors.white,
+                    borderOpacity: isSelected ? 0.4 : 0.04,
                   ),
                   child: ListTile(
                     onTap: () {
                       setState(() {
-                        selectedSolicitud = s;
+                        _selectedSolicitud = s;
                       });
                     },
                     title: Text(
-                      s['cliente'],
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13.5),
+                      s.id ?? 'Expediente',
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14),
                     ),
                     subtitle: Text(
-                      '${s['id']} • S/ ${s['monto']}',
+                      'Monto: S/ ${s.montoSolicitado} • Estado: ${s.estado.toUpperCase()}',
                       style: const TextStyle(color: Colors.white54, fontSize: 11.5),
                     ),
                   ),
@@ -276,89 +340,87 @@ class _EstadosSolicitudesScreenState extends State<EstadosSolicitudesScreen> wit
               },
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
 
           // Línea de tiempo derecha
           Expanded(
-            flex: 3,
+            flex: 6,
             child: Container(
-              decoration: BoxDecoration(
-                color: AppTheme.cardDark.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(22),
-                border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.2),
+              decoration: AppTheme.glassDecoration(
+                color: AppTheme.cardDark,
+                opacity: 0.85,
+                borderRadius: 24,
               ),
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: selectedSolicitud == null
-                    ? const Center(child: Text('Seleccione una solicitud', style: TextStyle(color: Colors.white38)))
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Historial de ${selectedSolicitud!['cliente']}',
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Código: ${selectedSolicitud!['id']} • Estado: ${selectedSolicitud!['estado']}',
-                            style: const TextStyle(color: Colors.white54, fontSize: 12),
-                          ),
-                          const Divider(color: Colors.white12, height: 24),
+                padding: const EdgeInsets.all(18.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Timeline de Expediente: ${currentSelected.id}',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12.0),
+                      child: Divider(color: Colors.white10, height: 1),
+                    ),
 
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: (selectedSolicitud!['timeline'] as List).length,
-                              itemBuilder: (context, tIndex) {
-                                final node = selectedSolicitud!['timeline'][tIndex];
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: timelineEvents.length,
+                        itemBuilder: (context, tIndex) {
+                          final event = timelineEvents[tIndex];
 
-                                return Row(
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Column(
+                                children: [
+                                  const Icon(Icons.circle, size: 10, color: AppTheme.bcpOrange),
+                                  if (tIndex < timelineEvents.length - 1)
+                                    Container(
+                                      width: 1.5,
+                                      height: 60,
+                                      color: Colors.white10,
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(width: 14),
+
+                              Expanded(
+                                child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Column(
-                                      children: [
-                                        const Icon(Icons.lens, size: 12, color: AppTheme.bcpOrange),
-                                        if (tIndex < (selectedSolicitud!['timeline'] as List).length - 1)
-                                          Container(
-                                            width: 1.5,
-                                            height: 54,
-                                            color: Colors.white24,
-                                          ),
-                                      ],
-                                    ),
-                                    const SizedBox(width: 14),
-
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            node['fecha'],
-                                            style: const TextStyle(
-                                              color: AppTheme.bcpCyan,
-                                              fontSize: 11.5,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            node['desc'],
-                                            style: const TextStyle(color: Colors.white70, fontSize: 12.5),
-                                          ),
-                                          const SizedBox(height: 16),
-                                        ],
+                                    Text(
+                                      event['fecha'],
+                                      style: const TextStyle(
+                                        color: AppTheme.neonCyan,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 0.5,
                                       ),
                                     ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      event['desc'],
+                                      style: const TextStyle(color: Colors.white70, fontSize: 12, height: 1.3),
+                                    ),
+                                    const SizedBox(height: 16),
                                   ],
-                                );
-                              },
-                            ),
-                          ),
-                        ],
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

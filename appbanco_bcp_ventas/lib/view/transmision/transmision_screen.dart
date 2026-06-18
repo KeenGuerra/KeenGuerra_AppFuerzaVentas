@@ -92,9 +92,9 @@ class _TransmisionScreenState extends State<TransmisionScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppTheme.cardDark.withOpacity(0.9),
+                  color: AppTheme.cardDark.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: AppTheme.bcpCyan.withOpacity(0.3), width: 1.2),
+                  border: Border.all(color: AppTheme.bcpCyan.withValues(alpha: 0.3), width: 1.2),
                 ),
                 child: Row(
                   children: [
@@ -166,7 +166,7 @@ class _TransmisionScreenState extends State<TransmisionScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.6),
+                      color: Colors.black.withValues(alpha: 0.6),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: Colors.white10),
                     ),
@@ -219,9 +219,9 @@ class _TransmisionScreenState extends State<TransmisionScreen> {
                             return Container(
                               margin: const EdgeInsets.only(bottom: 12),
                               decoration: BoxDecoration(
-                                color: AppTheme.cardDark.withOpacity(0.9),
+                                color: AppTheme.cardDark.withValues(alpha: 0.9),
                                 borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.2),
+                                border: Border.all(color: Colors.white.withValues(alpha: 0.04), width: 1.2),
                               ),
                               child: ListTile(
                                 leading: const CircleAvatar(

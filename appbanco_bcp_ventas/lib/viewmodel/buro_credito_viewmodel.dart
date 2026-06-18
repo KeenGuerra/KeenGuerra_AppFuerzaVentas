@@ -44,6 +44,11 @@ class BuroCreditoViewModel extends ChangeNotifier {
 
     try {
       consultas = await _buroService.obtenerConsultasCliente(clienteId);
+      if (consultas.isNotEmpty) {
+        ultimaConsulta = consultas.first;
+      } else {
+        ultimaConsulta = null;
+      }
     } catch (e) {
       error = e.toString().replaceFirst('Exception: ', '');
     } finally {

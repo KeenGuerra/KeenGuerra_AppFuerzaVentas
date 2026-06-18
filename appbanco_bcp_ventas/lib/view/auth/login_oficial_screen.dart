@@ -371,7 +371,27 @@ class _LoginOficialScreenState extends State<LoginOficialScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 28),
+                    // Botón para acceder al Portal de Clientes
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.pushNamed(context, AppRoutes.clientPortal);
+                        },
+                        icon: const Icon(Icons.phonelink_ring_rounded, color: AppTheme.neonCyan, size: 20),
+                        label: const Text(
+                          'SIMULAR PORTAL DE CLIENTES',
+                          style: TextStyle(color: AppTheme.neonCyan, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 0.5),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: AppTheme.bcpCyan, width: 1.5),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
 
                     // Pie de página elegante informativo
                     Container(

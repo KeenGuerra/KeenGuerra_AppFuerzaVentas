@@ -42,7 +42,7 @@ class _CapturaDocumentosScreenState extends State<CapturaDocumentosScreen> {
 
     setState(() {
       isCapturing = false;
-      capturedImagePath = 'mock_photo_${selectedDocType}.jpg';
+      capturedImagePath = 'mock_photo_$selectedDocType.jpg';
     });
   }
 

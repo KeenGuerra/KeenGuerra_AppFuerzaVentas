@@ -150,10 +150,10 @@ class _ProspeccionScreenState extends State<ProspeccionScreen> {
 
               Container(
                 decoration: BoxDecoration(
-                  color: AppTheme.cardDark.withOpacity(0.9),
+                  color: AppTheme.cardDark.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.04),
+                    color: Colors.white.withValues(alpha: 0.04),
                     width: 1.2,
                   ),
                 ),
@@ -285,7 +285,7 @@ class _ProspeccionScreenState extends State<ProspeccionScreen> {
                             width: double.infinity,
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: preEvalColor.withOpacity(0.08),
+                              color: preEvalColor.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(color: preEvalColor, width: 1.2),
                             ),
@@ -364,10 +364,10 @@ class _CampanaCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.06), width: 1),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),

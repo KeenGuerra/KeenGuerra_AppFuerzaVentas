@@ -934,6 +934,17 @@ class _AccionesCliente extends StatelessWidget {
             );
           },
         ),
+        _AccionButton(
+          icono: Icons.gavel_rounded,
+          texto: 'Gestionar Comité y Desembolso',
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              AppRoutes.decisionDesembolso,
+              arguments: cliente,
+            );
+          },
+        ),
       ],
     );
   }
