@@ -79,233 +79,376 @@ class _LoginOficialScreenState extends State<LoginOficialScreen> {
     final estaBloqueado = _segundosBloqueo > 0;
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.bcpGradient,
-        ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              child: Column(
-                children: [
-                  // Logo BCP Premium
-                  Container(
-                    width: 140,
-                    height: 80,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
-                      borderRadius: BorderRadius.circular(22),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Image.asset(
-                      'assets/images/logo_bcp.png',
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  const Text(
-                    'Fuerza de Ventas BCP',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  const Text(
-                    'Ingresa para gestionar tu cartera diaria',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white70,
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // Tarjeta de Login Glassmorphic
-                  Container(
-                    padding: const EdgeInsets.all(26),
-                    decoration: BoxDecoration(
-                      color: AppTheme.cardDark.withOpacity(0.85),
-                      borderRadius: BorderRadius.circular(28),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.08),
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.4),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Iniciar Sesión',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-
-                        TextField(
-                          controller: codigoController,
-                          enabled: !estaBloqueado,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: InputDecoration(
-                            labelText: 'Código de empleado',
-                            helperText: 'Ejemplo: OFI001',
-                            prefixIcon: const Icon(
-                              Icons.badge_outlined,
-                              color: AppTheme.bcpOrange,
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 18),
-
-                        TextField(
-                          controller: passwordController,
-                          obscureText: true,
-                          enabled: !estaBloqueado,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: const InputDecoration(
-                            labelText: 'Contraseña',
-                            prefixIcon: Icon(
-                              Icons.lock_outline,
-                              color: AppTheme.bcpOrange,
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        if (estaBloqueado)
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.redAccent.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.redAccent.withOpacity(0.4)),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.error_outline, color: Colors.redAccent, size: 20),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    'Bloqueado por seguridad.\nReintenta en $_segundosBloqueo segundos.',
-                                    style: const TextStyle(
-                                      color: Colors.redAccent,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        else if (viewModel.error != null)
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.redAccent.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 20),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    viewModel.error!,
-                                    style: const TextStyle(
-                                      color: Colors.redAccent,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                        const SizedBox(height: 24),
-
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: (viewModel.loading || estaBloqueado) ? null : ingresar,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.bcpOrange,
-                              shadowColor: AppTheme.bcpOrange.withOpacity(0.4),
-                              elevation: 4,
-                            ),
-                            child: viewModel.loading
-                                ? const SizedBox(
-                                    height: 22,
-                                    width: 22,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Text(
-                                    'Ingresar al Portal',
-                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                  ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.04),
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: Colors.white.withOpacity(0.05)),
-                    ),
-                    child: const Text(
-                      'Acceso seguro encriptado.\n'
-                      'Credenciales de prueba: ofi001 y contraseña de Supabase.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.white38,
-                      ),
-                    ),
-                  ),
-                ],
+      body: Stack(
+        children: [
+          // Fondo gradiente oficial
+          Positioned.fill(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: AppTheme.bcpGradient,
               ),
             ),
           ),
-        ),
+          
+          // Pintor de curvas de luz geométrica para el fondo premium
+          Positioned.fill(
+            child: CustomPaint(
+              painter: _LoginBackgroundPainter(),
+            ),
+          ),
+
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Animación de entrada para el Logo BCP
+                    TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      duration: const Duration(milliseconds: 800),
+                      builder: (context, val, child) {
+                        return Transform.scale(
+                          scale: val,
+                          child: Opacity(
+                            opacity: val,
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: 150,
+                        height: 90,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(28),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppTheme.bcpCyan.withOpacity(0.25),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Image.asset(
+                          'assets/images/logo_bcp.png',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 28),
+
+                    // Animación de entrada para los Textos del Encabezado
+                    TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      duration: const Duration(milliseconds: 1000),
+                      builder: (context, val, child) {
+                        return Transform.translate(
+                          offset: Offset(0, 20 * (1 - val)),
+                          child: Opacity(
+                            opacity: val,
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: const Column(
+                        children: [
+                          Text(
+                            'Portal Fuerza de Ventas',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            'Ingresa tus credenciales oficiales de campo BCP',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 36),
+
+                    // Animación de entrada para la Tarjeta de Login Glassmorphic
+                    TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      duration: const Duration(milliseconds: 1200),
+                      builder: (context, val, child) {
+                        return Transform.translate(
+                          offset: Offset(0, 30 * (1 - val)),
+                          child: Opacity(
+                            opacity: val,
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(28),
+                        decoration: AppTheme.glassDecoration(
+                          color: AppTheme.cardDark,
+                          opacity: 0.82,
+                          borderRadius: 30,
+                          borderColor: AppTheme.bcpCyan,
+                          borderOpacity: 0.12,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Inicio de Sesión',
+                              style: TextStyle(
+                                fontSize: 19,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 22),
+
+                            // Campo de Código
+                            TextField(
+                              controller: codigoController,
+                              enabled: !estaBloqueado,
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                              decoration: InputDecoration(
+                                labelText: 'Código de empleado',
+                                helperText: 'Formato requerido: OFI001',
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.bcpOrange.withOpacity(0.12),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.badge_outlined,
+                                      color: AppTheme.neonOrange,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 20),
+
+                            // Campo de Contraseña
+                            TextField(
+                              controller: passwordController,
+                              obscureText: true,
+                              enabled: !estaBloqueado,
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                              decoration: InputDecoration(
+                                labelText: 'Contraseña',
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.bcpOrange.withOpacity(0.12),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.lock_outline_rounded,
+                                      color: AppTheme.neonOrange,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 18),
+
+                            // Mensajes de Alerta y Bloqueo con estilo de cristal
+                            if (estaBloqueado)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.neonRed.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(color: AppTheme.neonRed.withOpacity(0.4), width: 1.2),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.security_rounded, color: AppTheme.neonRed, size: 22),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        'Acceso bloqueado temporalmente.\nIntenta de nuevo en $_segundosBloqueo segundos.',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else if (viewModel.error != null)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.neonOrange.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(color: AppTheme.neonOrange.withOpacity(0.4), width: 1.2),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.warning_amber_rounded, color: AppTheme.neonOrange, size: 22),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        viewModel.error!,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                            const SizedBox(height: 28),
+
+                            // Botón de Ingreso con Gradiente Premium y sombra neón
+                            SizedBox(
+                              width: double.infinity,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: AppTheme.bcpOrangeGradient,
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: AppTheme.neonGlowShadow(
+                                    color: AppTheme.bcpOrange,
+                                    opacity: (viewModel.loading || estaBloqueado) ? 0.0 : 0.35,
+                                    blurRadius: 18,
+                                  ),
+                                ),
+                                child: ElevatedButton(
+                                  onPressed: (viewModel.loading || estaBloqueado) ? null : ingresar,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    surfaceTintColor: Colors.transparent,
+                                    elevation: 0,
+                                  ),
+                                  child: viewModel.loading
+                                      ? const SizedBox(
+                                          height: 24,
+                                          width: 24,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 2.5,
+                                          ),
+                                        )
+                                      : const Text(
+                                          'INGRESAR AL PORTAL',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 0.8,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 28),
+
+                    // Pie de página elegante informativo
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                      decoration: AppTheme.glassDecoration(
+                        color: Colors.white,
+                        opacity: 0.03,
+                        borderRadius: 20,
+                        borderColor: Colors.white,
+                        borderOpacity: 0.04,
+                      ),
+                      child: const Text(
+                        'Acceso oficial restringido. Conexión protegida SSL de extremo a extremo.\n'
+                        'Pruebas: Empleado [ofi001], Contraseña de Supabase.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.white38,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
+}
+
+// Pintor de fondo geométrico tecnológico
+class _LoginBackgroundPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+
+    // Curva superior izquierda
+    paint.color = AppTheme.bcpCyan.withOpacity(0.08);
+    final path1 = Path();
+    path1.moveTo(0, size.height * 0.3);
+    path1.quadraticBezierTo(
+      size.width * 0.4,
+      size.height * 0.25,
+      size.width * 0.6,
+      0,
+    );
+    canvas.drawPath(path1, paint);
+
+    // Curva superior izquierda alternativa
+    paint.color = AppTheme.bcpOrange.withOpacity(0.05);
+    final path2 = Path();
+    path2.moveTo(0, size.height * 0.4);
+    path2.quadraticBezierTo(
+      size.width * 0.5,
+      size.height * 0.3,
+      size.width * 0.7,
+      0,
+    );
+    canvas.drawPath(path2, paint);
+
+    // Círculo decorativo en esquina inferior derecha
+    paint.style = PaintingStyle.fill;
+    paint.color = AppTheme.bcpBlue.withOpacity(0.12);
+    canvas.drawCircle(Offset(size.width * 1.1, size.height * 0.8), size.width * 0.4, paint);
+
+    paint.style = PaintingStyle.stroke;
+    paint.color = AppTheme.bcpCyan.withOpacity(0.06);
+    paint.strokeWidth = 2;
+    canvas.drawCircle(Offset(size.width * 1.1, size.height * 0.8), size.width * 0.42, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

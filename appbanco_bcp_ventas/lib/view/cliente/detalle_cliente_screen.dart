@@ -48,7 +48,9 @@ class _DetalleClienteScreenState extends State<DetalleClienteScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Gestión actualizada como visitada.'),
+        content: Text('Gestión actualizada como visitada con éxito.'),
+        backgroundColor: AppTheme.neonGreen,
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
@@ -60,8 +62,9 @@ class _DetalleClienteScreenState extends State<DetalleClienteScreen> {
     return Scaffold(
       backgroundColor: AppTheme.darkBackground,
       appBar: AppBar(
-        backgroundColor: AppTheme.bcpBlue,
-        title: const Text('Ficha del Cliente'),
+        backgroundColor: AppTheme.darkBackground,
+        title: const Text('Expediente del Cliente'),
+        elevation: 0,
       ),
       body: Container(
         decoration: const BoxDecoration(
@@ -69,14 +72,17 @@ class _DetalleClienteScreenState extends State<DetalleClienteScreen> {
         ),
         child: viewModel.loading
             ? const Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(color: AppTheme.bcpOrange),
               )
             : viewModel.error != null
                 ? Center(
-                    child: Text(
-                      viewModel.error!,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Text(
+                        viewModel.error!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: AppTheme.neonRed, fontSize: 15),
+                      ),
                     ),
                   )
                 : viewModel.cliente == null
@@ -91,6 +97,7 @@ class _DetalleClienteScreenState extends State<DetalleClienteScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // Cabecera Premium
                             _CabeceraCliente(
                               nombre: viewModel.cliente!.nombreCompleto,
                               dni: viewModel.cliente!.dni,
@@ -99,120 +106,227 @@ class _DetalleClienteScreenState extends State<DetalleClienteScreen> {
 
                             const SizedBox(height: 12),
 
-                            // Alertas de Cartera y Semáforo de Riesgo
+                            // Alertas de Cartera y Semáforo de Riesgo (Glassmorphic panels)
                             _buildRiesgoYAlertasSection(),
 
                             const SizedBox(height: 12),
 
-                            // Ofertas Preaprobadas
+                            // Oferta Campaña Destacada (Con gradiente de contraste)
                             _buildOfertasPreaprobadasCard(),
 
                             const SizedBox(height: 12),
 
+                            // Tarjeta de Información General
                             _SeccionCard(
                               titulo: 'Información General',
-                              icono: Icons.person_outline,
+                              icono: Icons.person_outline_rounded,
                               children: [
-                                _DatoItem(
-                                  titulo: 'Teléfono',
-                                  valor: viewModel.cliente!.telefono ??
-                                      'No registrado',
+                                _buildDatoFila(
+                                  titulo: 'Teléfono o Celular',
+                                  valor: viewModel.cliente!.telefono ?? 'No registrado',
+                                  icono: Icons.phone_android_rounded,
                                 ),
-                                _DatoItem(
-                                  titulo: 'Dirección',
-                                  valor: viewModel.cliente!.direccion ??
-                                      'No registrada',
+                                const Divider(color: Colors.white10, height: 16),
+                                _buildDatoFila(
+                                  titulo: 'Dirección del Domicilio',
+                                  valor: viewModel.cliente!.direccion ?? 'No registrada',
+                                  icono: Icons.home_work_outlined,
                                 ),
-                                _DatoItem(
-                                  titulo: 'Negocio',
-                                  valor: viewModel.cliente!.negocio ??
-                                      'No registrado',
+                                const Divider(color: Colors.white10, height: 16),
+                                _buildDatoFila(
+                                  titulo: 'Nombre del Negocio',
+                                  valor: viewModel.cliente!.negocio ?? 'No registrado',
+                                  icono: Icons.storefront_outlined,
                                 ),
-                                _DatoItem(
-                                  titulo: 'Actividad Económica',
-                                  valor: viewModel.cliente!.actividadEconomica ??
-                                      'No registrada',
+                                const Divider(color: Colors.white10, height: 16),
+                                _buildDatoFila(
+                                  titulo: 'Actividad Económica principal',
+                                  valor: viewModel.cliente!.actividadEconomica ?? 'No registrada',
+                                  icono: Icons.monetization_on_outlined,
                                 ),
                               ],
                             ),
 
                             const SizedBox(height: 12),
 
+                            // Estado de Gestión en Campo
                             _SeccionCard(
-                              titulo: 'Gestión de Cartera Diaria',
-                              icono: Icons.assignment_outlined,
+                              titulo: 'Gestión en Campo Diaria',
+                              icono: Icons.assignment_turned_in_outlined,
                               children: [
-                                _DatoItem(
-                                    titulo: 'Tipo de gestión',
-                                    valor: clienteCartera?.tipoGestion ?? 'Sin dato'),
-                                _DatoItem(
-                                    titulo: 'Estado actual de hoy',
-                                    valor: clienteCartera?.estado ?? 'Sin dato'),
-                                const SizedBox(height: 10),
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton.icon(
-                                    onPressed: marcarComoVisitado,
-                                    icon: const Icon(Icons.check_circle_outline),
-                                    label: const Text('Marcar como visitado'),
-                                  ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _DatoItem(
+                                        titulo: 'Tipo de gestión',
+                                        valor: clienteCartera?.tipoGestion ?? 'No Asignado',
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: _DatoItem(
+                                        titulo: 'Estado actual hoy',
+                                        valor: clienteCartera?.estado ?? 'Pendiente',
+                                      ),
+                                    ),
+                                  ],
                                 ),
+                                const SizedBox(height: 14),
+                                if (clienteCartera?.estado != 'Visitado')
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        gradient: AppTheme.bcpCyanGradient,
+                                        borderRadius: BorderRadius.circular(20),
+                                        boxShadow: AppTheme.neonGlowShadow(
+                                          color: AppTheme.bcpCyan,
+                                          opacity: 0.2,
+                                        ),
+                                      ),
+                                      child: ElevatedButton.icon(
+                                        onPressed: marcarComoVisitado,
+                                        icon: const Icon(Icons.check_circle_outline_rounded),
+                                        label: const Text('MARCAR COMO VISITADO'),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          shadowColor: Colors.transparent,
+                                          surfaceTintColor: Colors.transparent,
+                                          elevation: 0,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.neonGreen.withOpacity(0.08),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(color: AppTheme.neonGreen.withOpacity(0.3)),
+                                    ),
+                                    child: const Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.check_circle, color: AppTheme.neonGreen, size: 20),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'VISITA REGISTRADA CON ÉXITO',
+                                          style: TextStyle(
+                                            color: AppTheme.neonGreen,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 13,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                               ],
                             ),
 
                             const SizedBox(height: 12),
 
-                            // Historial de Pagos y Gráfico CustomPainter
+                            // Historial de Pagos y Gráfico Bezier
                             _buildGraficoPagosCard(),
 
                             const SizedBox(height: 12),
 
+                            // Productos Activos BCP
                             _SeccionCard(
                               titulo: 'Productos Activos BCP',
-                              icono: Icons.credit_card_outlined,
+                              icono: Icons.credit_card_rounded,
                               children: viewModel.productosActivos.isEmpty
                                   ? const [
-                                      Text(
-                                        'No hay productos activos registrados.',
-                                        style: TextStyle(color: Colors.white38),
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                                        child: Text(
+                                          'No hay productos activos registrados.',
+                                          style: TextStyle(color: Colors.white30, fontSize: 13),
+                                        ),
                                       ),
                                     ]
                                   : viewModel.productosActivos.map((producto) {
-                                      return _DatoItem(
-                                        titulo:
-                                            producto['producto']?.toString() ??
-                                                'Producto',
-                                        valor:
-                                            'Saldo: S/ ${producto['saldo'] ?? '0.00'}',
+                                      return Padding(
+                                        padding: const EdgeInsets.only(bottom: 8.0),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withOpacity(0.03),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                producto['producto']?.toString() ?? 'Producto BCP',
+                                                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                              ),
+                                              Text(
+                                                'Saldo: S/ ${producto['saldo'] ?? '0.00'}',
+                                                style: const TextStyle(color: AppTheme.neonCyan, fontWeight: FontWeight.bold),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       );
                                     }).toList(),
                             ),
 
                             const SizedBox(height: 12),
 
+                            // Historial Crediticio
                             _SeccionCard(
                               titulo: 'Historial Crediticio',
-                              icono: Icons.history_outlined,
+                              icono: Icons.history_edu_rounded,
                               children: viewModel.historialCrediticio.isEmpty
                                   ? const [
-                                      Text(
-                                        'No hay historial crediticio registrado.',
-                                        style: TextStyle(color: Colors.white38),
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                                        child: Text(
+                                          'No hay historial crediticio registrado.',
+                                          style: TextStyle(color: Colors.white30, fontSize: 13),
+                                        ),
                                       ),
                                     ]
                                   : viewModel.historialCrediticio.map((item) {
-                                      return _DatoItem(
-                                        titulo:
-                                            item['producto']?.toString() ??
-                                                'Crédito',
-                                        valor:
-                                            'Monto: S/ ${item['monto']} | Estado: ${item['estado']}',
+                                      return Padding(
+                                        padding: const EdgeInsets.only(bottom: 8.0),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withOpacity(0.02),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  item['producto']?.toString() ?? 'Préstamo',
+                                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                                                ),
+                                              ),
+                                              Text(
+                                                'S/ ${item['monto']} [${item['estado']}]',
+                                                style: TextStyle(
+                                                  color: item['estado'] == 'Cancelado' || item['estado'] == 'Pagado'
+                                                      ? AppTheme.neonGreen
+                                                      : AppTheme.neonOrange,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       );
                                     }).toList(),
                             ),
 
-                            const SizedBox(height: 18),
+                            const SizedBox(height: 20),
 
+                            // Bloque de Acciones Rápidas con flechas y gradientes
                             _AccionesCliente(
                               cliente: clienteCartera,
                             ),
@@ -223,105 +337,148 @@ class _DetalleClienteScreenState extends State<DetalleClienteScreen> {
     );
   }
 
+  Widget _buildDatoFila({required String titulo, required String valor, required IconData icono}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.04),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icono, color: AppTheme.bcpCyan, size: 18),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                titulo,
+                style: const TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                valor,
+                style: const TextStyle(color: Colors.white, fontSize: 14.5, fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildRiesgoYAlertasSection() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Semáforo de riesgo
+        // Semáforo de riesgo rediseñado
         Expanded(
           flex: 4,
           child: Container(
-            decoration: BoxDecoration(
-              color: AppTheme.cardDark.withOpacity(0.9),
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.04),
-                width: 1.2,
-              ),
+            decoration: AppTheme.glassDecoration(
+              color: AppTheme.cardDark,
+              opacity: 0.85,
+              borderRadius: 24,
+              borderColor: AppTheme.neonGreen,
+              borderOpacity: 0.15,
             ),
             child: Padding(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
                   const Text(
-                    'Score Buró',
-                    style: TextStyle(fontSize: 12, color: Colors.white70, fontWeight: FontWeight.bold),
+                    'Score SBS',
+                    style: TextStyle(fontSize: 12, color: Colors.white60, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
                   Container(
-                    width: 54,
-                    height: 54,
+                    width: 62,
+                    height: 62,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.greenAccent.withOpacity(0.08),
-                      border: Border.all(color: Colors.greenAccent, width: 3.5),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.greenAccent.withOpacity(0.2),
-                          blurRadius: 8,
-                          spreadRadius: 1,
-                        )
-                      ],
+                      color: Colors.black.withOpacity(0.2),
+                      border: Border.all(color: AppTheme.neonGreen, width: 3.5),
+                      boxShadow: AppTheme.neonGlowShadow(color: AppTheme.neonGreen, opacity: 0.25, blurRadius: 10),
                     ),
                     child: const Center(
                       child: Text(
                         'A+',
-                        style: TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 20),
+                        style: TextStyle(color: AppTheme.neonGreen, fontWeight: FontWeight.bold, fontSize: 22),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  const Text('Score: 740 / 850', style: TextStyle(color: Colors.white54, fontSize: 11)),
-                  const Text('RIESGO BAJO', style: TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 10, letterSpacing: 0.5)),
+                  const SizedBox(height: 12),
+                  const Text('Score: 740 / 850', style: TextStyle(color: Colors.white38, fontSize: 10)),
+                  const SizedBox(height: 3),
+                  const Text(
+                    'RIESGO BAJO',
+                    style: TextStyle(
+                      color: AppTheme.neonGreen, 
+                      fontWeight: FontWeight.bold, 
+                      fontSize: 10, 
+                      letterSpacing: 0.8,
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
         ),
         const SizedBox(width: 10),
-        // Alertas de cartera
+        // Alertas de cartera rediseñadas
         Expanded(
           flex: 6,
           child: Container(
-            decoration: BoxDecoration(
-              color: AppTheme.cardDark.withOpacity(0.9),
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.04),
-                width: 1.2,
-              ),
+            height: 155, // Igualar altura del bloque izquierdo
+            decoration: AppTheme.glassDecoration(
+              color: AppTheme.cardDark,
+              opacity: 0.85,
+              borderRadius: 24,
+              borderColor: Colors.white,
+              borderOpacity: 0.05,
             ),
             child: Padding(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Alertas de Campo',
-                    style: TextStyle(fontSize: 12, color: Colors.white70, fontWeight: FontWeight.bold),
+                    'Alertas del Sistema',
+                    style: TextStyle(fontSize: 12, color: Colors.white60, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
                   Row(
                     children: [
-                      const Icon(Icons.cake_outlined, color: AppTheme.bcpOrange, size: 18),
-                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(color: AppTheme.bcpOrange.withOpacity(0.12), shape: BoxShape.circle),
+                        child: const Icon(Icons.cake_outlined, color: AppTheme.neonOrange, size: 16),
+                      ),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          '¡Cumpleaños del cliente hoy!',
-                          style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 11),
+                          '¡Cumpleaños hoy!',
+                          style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 11.5, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
                   Row(
                     children: [
-                      const Icon(Icons.star_outline_rounded, color: Colors.amberAccent, size: 18),
-                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(color: Colors.amber.withOpacity(0.12), shape: BoxShape.circle),
+                        child: const Icon(Icons.star_outline_rounded, color: Colors.amberAccent, size: 16),
+                      ),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          'Cliente clasificado Excelente.',
-                          style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 11),
+                          'Calificación: Excelente.',
+                          style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 11.5, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
@@ -338,72 +495,85 @@ class _DetalleClienteScreenState extends State<DetalleClienteScreen> {
   Widget _buildOfertasPreaprobadasCard() {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppTheme.bcpBlue.withOpacity(0.8),
-            const Color(0xFF001A40),
-          ],
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0C2554), Color(0xFF07183B)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: AppTheme.bcpCyan.withOpacity(0.3),
+          color: AppTheme.bcpCyan.withOpacity(0.25),
           width: 1.5,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
+        boxShadow: AppTheme.neonGlowShadow(color: AppTheme.bcpCyan, opacity: 0.15, blurRadius: 12),
       ),
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Row(
           children: [
-            const CircleAvatar(
-              backgroundColor: AppTheme.bcpCyan,
-              child: Icon(Icons.stars, color: Colors.white),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppTheme.bcpCyan.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.stars_rounded, color: AppTheme.neonCyan, size: 24),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Oferta Campaña Pre-aprobada',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.bcpCyan, fontSize: 13, letterSpacing: 0.5),
+                    'CAMPAÑA PREAPROBADA BCP',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold, 
+                      color: AppTheme.neonCyan, 
+                      fontSize: 11, 
+                      letterSpacing: 0.8,
+                    ),
                   ),
+                  const SizedBox(height: 2),
                   const Text(
-                    'BCP Micro-crédito: S/ 15,000',
+                    'Micro-crédito: S/ 15,000',
                     style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
-                  Text(
+                  const SizedBox(height: 2),
+                  const Text(
                     'Tasa preferencial: 15.5% TEA a 12 meses',
-                    style: TextStyle(color: Colors.white70, fontSize: 11),
+                    style: TextStyle(color: Colors.white60, fontSize: 11),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.nuevaSolicitud,
-                  arguments: clienteCartera,
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.bcpOrange,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            const SizedBox(width: 6),
+            Container(
+              decoration: BoxDecoration(
+                gradient: AppTheme.bcpOrangeGradient,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: AppTheme.neonGlowShadow(color: AppTheme.bcpOrange, opacity: 0.25),
+              ),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.nuevaSolicitud,
+                    arguments: clienteCartera,
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'TOMAR',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                 ),
               ),
-              child: const Text('Tomar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -413,13 +583,12 @@ class _DetalleClienteScreenState extends State<DetalleClienteScreen> {
 
   Widget _buildGraficoPagosCard() {
     return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.cardDark.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.04),
-          width: 1.2,
-        ),
+      decoration: AppTheme.glassDecoration(
+        color: AppTheme.cardDark,
+        opacity: 0.85,
+        borderRadius: 24,
+        borderColor: Colors.white,
+        borderOpacity: 0.04,
       ),
       child: Padding(
         padding: const EdgeInsets.all(18),
@@ -428,15 +597,15 @@ class _DetalleClienteScreenState extends State<DetalleClienteScreen> {
           children: [
             const Row(
               children: [
-                Icon(Icons.show_chart_outlined, color: AppTheme.bcpOrange),
+                Icon(Icons.show_chart_rounded, color: AppTheme.bcpOrange),
                 SizedBox(width: 8),
                 Text(
                   'Historial de Pagos de Cuotas',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14.5),
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 15),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 18),
             Container(
               height: 110,
               width: double.infinity,
@@ -450,12 +619,12 @@ class _DetalleClienteScreenState extends State<DetalleClienteScreen> {
             const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Ene (S/350)', style: TextStyle(color: Colors.white38, fontSize: 10)),
-                Text('Feb (S/350)', style: TextStyle(color: Colors.white38, fontSize: 10)),
-                Text('Mar (S/350)', style: TextStyle(color: Colors.white38, fontSize: 10)),
-                Text('Abr (S/350)', style: TextStyle(color: Colors.white38, fontSize: 10)),
-                Text('May (S/350)', style: TextStyle(color: Colors.white38, fontSize: 10)),
-                Text('Jun (S/350)', style: TextStyle(color: Colors.white38, fontSize: 10)),
+                Text('Ene (S/350)', style: TextStyle(color: Colors.white30, fontSize: 9.5)),
+                Text('Feb (S/350)', style: TextStyle(color: Colors.white30, fontSize: 9.5)),
+                Text('Mar (S/350)', style: TextStyle(color: Colors.white30, fontSize: 9.5)),
+                Text('Abr (S/350)', style: TextStyle(color: Colors.white30, fontSize: 9.5)),
+                Text('May (S/350)', style: TextStyle(color: Colors.white30, fontSize: 9.5)),
+                Text('Jun (S/350)', style: TextStyle(color: Colors.white30, fontSize: 9.5)),
               ],
             ),
           ],
@@ -465,21 +634,31 @@ class _DetalleClienteScreenState extends State<DetalleClienteScreen> {
   }
 }
 
+// Custom Painter de Gráficos Bezier Premium con degradado neón
 class _PaymentGraphPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final double stepX = size.width / 5;
+    // Puntos normalizados (0 a 1) para representar altura
     final List<double> ptsY = [0.8, 0.76, 0.85, 0.82, 0.92, 0.89];
 
+    // Dibujar líneas verticales sutiles de la cuadrícula de fondo
+    final gridPaint = Paint()
+      ..color = Colors.white.withOpacity(0.04)
+      ..strokeWidth = 1;
+    for (int i = 0; i < ptsY.length; i++) {
+      canvas.drawLine(Offset(stepX * i, 0), Offset(stepX * i, size.height), gridPaint);
+    }
+
     final linePaint = Paint()
-      ..color = AppTheme.bcpCyan
+      ..color = AppTheme.neonCyan
       ..strokeWidth = 3.5
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
     final fillPaint = Paint()
       ..shader = LinearGradient(
-        colors: [AppTheme.bcpCyan.withOpacity(0.25), Colors.transparent],
+        colors: [AppTheme.bcpCyan.withOpacity(0.3), Colors.transparent],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
@@ -488,30 +667,37 @@ class _PaymentGraphPainter extends CustomPainter {
     final path = Path();
     path.moveTo(0, size.height - (size.height * ptsY[0]));
 
-    for (int i = 1; i < ptsY.length; i++) {
-      path.lineTo(stepX * i, size.height - (size.height * ptsY[i]));
+    // Dibujar curvas Bezier suaves (Spline)
+    for (int i = 0; i < ptsY.length - 1; i++) {
+      final x1 = stepX * i;
+      final y1 = size.height - (size.height * ptsY[i]);
+      final x2 = stepX * (i + 1);
+      final y2 = size.height - (size.height * ptsY[i + 1]);
+      
+      final cx = (x1 + x2) / 2;
+      path.cubicTo(cx, y1, cx, y2, x2, y2);
     }
 
     canvas.drawPath(path, linePaint);
 
-    // Rellenar área bajo la curva
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
-    path.close();
+    // Rellenar área bajo la curva suave
+    final fillPath = Path.from(path);
+    fillPath.lineTo(size.width, size.height);
+    fillPath.lineTo(0, size.height);
+    fillPath.close();
 
-    canvas.drawPath(path, fillPaint);
+    canvas.drawPath(fillPath, fillPaint);
 
-    // Puntos decorativos
+    // Puntos decorativos con resplandor neón
     final dotPaint = Paint()..color = Colors.white;
-    final borderDotPaint = Paint()
-      ..color = AppTheme.bcpCyan
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
+    final dotGlow = Paint()
+      ..color = AppTheme.neonCyan.withOpacity(0.5)
+      ..style = PaintingStyle.fill;
 
     for (int i = 0; i < ptsY.length; i++) {
       final center = Offset(stepX * i, size.height - (size.height * ptsY[i]));
-      canvas.drawCircle(center, 4.5, dotPaint);
-      canvas.drawCircle(center, 4.5, borderDotPaint);
+      canvas.drawCircle(center, 7, dotGlow);
+      canvas.drawCircle(center, 4, dotPaint);
     }
   }
 
@@ -533,29 +719,23 @@ class _CabeceraCliente extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.cardDark.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.04),
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
+      decoration: AppTheme.glassDecoration(
+        color: AppTheme.cardDark,
+        opacity: 0.85,
+        borderRadius: 26,
+        borderColor: AppTheme.bcpCyan,
+        borderOpacity: 0.12,
       ),
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(20),
         child: Row(
           children: [
             Container(
+              padding: const EdgeInsets.all(3),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: AppTheme.bcpOrange, width: 2),
+                border: Border.all(color: AppTheme.bcpOrange, width: 2.5),
+                boxShadow: AppTheme.neonGlowShadow(color: AppTheme.bcpOrange, opacity: 0.25),
               ),
               child: const CircleAvatar(
                 radius: 28,
@@ -567,7 +747,7 @@ class _CabeceraCliente extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -576,32 +756,31 @@ class _CabeceraCliente extends StatelessWidget {
                     nombre,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 19,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'DNI: $dni',
-                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                    'Documento Nacional de Identidad: $dni',
+                    style: const TextStyle(color: Colors.white54, fontSize: 12),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: Colors.green.withOpacity(0.4), width: 1),
+                      color: AppTheme.neonGreen.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppTheme.neonGreen.withOpacity(0.4)),
                     ),
                     child: Text(
-                      estado,
+                      estado.toUpperCase(),
                       style: const TextStyle(
-                        color: Colors.greenAccent,
+                        color: AppTheme.neonGreen,
                         fontWeight: FontWeight.bold,
-                        fontSize: 11,
+                        fontSize: 10,
+                        letterSpacing: 0.8,
                       ),
                     ),
                   ),
@@ -629,13 +808,12 @@ class _SeccionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.cardDark.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.04),
-          width: 1.2,
-        ),
+      decoration: AppTheme.glassDecoration(
+        color: AppTheme.cardDark,
+        opacity: 0.85,
+        borderRadius: 24,
+        borderColor: Colors.white,
+        borderOpacity: 0.04,
       ),
       child: Padding(
         padding: const EdgeInsets.all(18),
@@ -644,20 +822,30 @@ class _SeccionCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icono, color: AppTheme.bcpCyan, size: 22),
-                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppTheme.bcpCyan.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icono, color: AppTheme.bcpCyan, size: 20),
+                ),
+                const SizedBox(width: 10),
                 Text(
                   titulo,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 15.5,
                     fontWeight: FontWeight.bold,
-                    letterSpacing: 0.3,
+                    letterSpacing: 0.5,
                   ),
                 ),
               ],
             ),
-            const Divider(color: Colors.white12, height: 24),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 14.0),
+              child: Divider(color: Colors.white10, height: 1),
+            ),
             ...children,
           ],
         ),
@@ -677,30 +865,27 @@ class _DatoItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            titulo,
-            style: const TextStyle(
-              color: Colors.white38,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          titulo,
+          style: const TextStyle(
+            color: Colors.white38,
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
           ),
-          const SizedBox(height: 3),
-          Text(
-            valor,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14.5,
-              fontWeight: FontWeight.w600,
-            ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          valor,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14.5,
+            fontWeight: FontWeight.bold,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -717,8 +902,8 @@ class _AccionesCliente extends StatelessWidget {
     return Column(
       children: [
         _AccionButton(
-          icono: Icons.request_page_outlined,
-          texto: 'Nueva solicitud de crédito',
+          icono: Icons.description_outlined,
+          texto: 'Nueva Solicitud de Crédito',
           onTap: () {
             Navigator.pushNamed(
               context,
@@ -728,8 +913,8 @@ class _AccionesCliente extends StatelessWidget {
           },
         ),
         _AccionButton(
-          icono: Icons.folder_open_outlined,
-          texto: 'Capturar documentos',
+          icono: Icons.camera_alt_outlined,
+          texto: 'Capturar Documentos de Soporte',
           onTap: () {
             Navigator.pushNamed(
               context,
@@ -739,8 +924,8 @@ class _AccionesCliente extends StatelessWidget {
           },
         ),
         _AccionButton(
-          icono: Icons.search_outlined,
-          texto: 'Consultar buró',
+          icono: Icons.screen_search_desktop_outlined,
+          texto: 'Consultar Buró de Crédito SBS',
           onTap: () {
             Navigator.pushNamed(
               context,
@@ -769,21 +954,28 @@ class _AccionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: AppTheme.cardDark.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.04),
-          width: 1.2,
-        ),
+      decoration: AppTheme.glassDecoration(
+        color: AppTheme.cardDark,
+        opacity: 0.85,
+        borderRadius: 20,
+        borderColor: AppTheme.bcpOrange,
+        borderOpacity: 0.08,
       ),
       child: ListTile(
         onTap: onTap,
         dense: true,
-        leading: Icon(
-          icono,
-          color: AppTheme.bcpOrange,
-          size: 22,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppTheme.bcpOrange.withOpacity(0.12),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            icono,
+            color: AppTheme.neonOrange,
+            size: 20,
+          ),
         ),
         title: Text(
           texto,
@@ -794,7 +986,7 @@ class _AccionButton extends StatelessWidget {
           ),
         ),
         trailing: const Icon(
-          Icons.arrow_forward_ios,
+          Icons.arrow_forward_ios_rounded,
           color: Colors.white30,
           size: 14,
         ),
